@@ -1,6 +1,8 @@
 # mirador-window-zoom-disable
 A Mirador plugin that allows users to disable (and re-enable) zoom controls per window.
 
+![window zoom disable button](images/window-zoom-disable.png)
+
 ## Setup
 Drop these files into your Mirador build output directory and point your webpage to them:
 ```html
