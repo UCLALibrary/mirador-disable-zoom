@@ -1,4 +1,4 @@
-var MiradorWindowZoomDisable = {
+var MiradorDisableZoom = {
 
     // TODO: add more locales
     locales: {
@@ -8,7 +8,7 @@ var MiradorWindowZoomDisable = {
     },
 
     template: Mirador.Handlebars.compile([
-        '<a href="javascript:;" class="mirador-btn mirador-icon-zoom-lock contained-tooltip" title="{{t "button-tooltip"}}">',
+        '<a href="javascript:;" class="mirador-btn mirador-icon-disable-zoom contained-tooltip" title="{{t "button-tooltip"}}">',
             '<i class="fa fa-search fa-lg fa-fw"></i>',
             '<i class="fa fa-lock"></i>',
         '</a>'
@@ -40,7 +40,7 @@ var MiradorWindowZoomDisable = {
 
                 // turn off zoom disable when we change the current canvas
                 this.eventEmitter.subscribe('SET_CURRENT_CANVAS_ID.' + this.id, function(event) {
-                    this.toggleZoomLock(this.element.find('.mirador-icon-zoom-lock'), false);
+                    this.toggleZoomLock(this.element.find('.mirador-icon-disable-zoom'), false);
                 }.bind(this));
 
                 // turn off zoom disable when we change between ImageView and BookView
@@ -48,7 +48,7 @@ var MiradorWindowZoomDisable = {
                 /*
                 this.eventEmitter.subscribe('focusUpdated' + this.id, function(event) {
                     // toggle window zoom off
-                    this.toggleZoomLock(this.element.find('.mirador-icon-zoom-lock'), false);
+                    this.toggleZoomLock(this.element.find('.mirador-icon-disable-zoom'), false);
                 }.bind(this));
                 */
             };
@@ -63,7 +63,7 @@ var MiradorWindowZoomDisable = {
                 w.element.find('.window-manifest-navigation').prepend(_this.template());
 
                 // TODO: do the following by extending bindEvents instead, for consistency with how we are extending listenForActions
-                w.element.find('.mirador-icon-zoom-lock').on('click', function(event) {
+                w.element.find('.mirador-icon-disable-zoom').on('click', function(event) {
                     w.toggleZoomLock(this, !w.windowZoomDisabled);
                 });
 
@@ -79,7 +79,7 @@ var MiradorWindowZoomDisable = {
             *
             * Disables or enables this window's zoom controls.
             * @param {Object} linkElement
-            *   The <a> element with class '.mirador-icon-zoom-lock'.
+            *   The <a> element with class '.mirador-icon-disable-zoom'.
             * @param {Boolean} disableOsdZoom
             *   Whether to set this window's zoom to enabled (false) or disabled (true).
             */
@@ -134,5 +134,5 @@ var MiradorWindowZoomDisable = {
 };
 
 $(document).ready(function() {
-    MiradorWindowZoomDisable.init();
+    MiradorDisableZoom.init();
 });
