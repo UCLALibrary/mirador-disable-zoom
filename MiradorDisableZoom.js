@@ -2,8 +2,10 @@ var MiradorDisableZoom = {
 
     // TODO: add more locales
     locales: {
-        'en': {
-            'button-tooltip': 'Disable zoom controls on this window'
+        en: {
+            translation: {
+                'button-tooltip': 'Disable zoom controls on this window'
+            }
         }
     },
 
@@ -19,7 +21,9 @@ var MiradorDisableZoom = {
 
         i18next.on('initialized', function() {
             for (var locale in _this.locales) {
-                i18next.addResources(locale, 'translation', _this.locales[locale]);
+                // add translations from each locale
+                var ns = 'translation';
+                i18next.addResourceBundle(locale, ns, _this.locales[locale][ns], true, true);
             };
         });
 
@@ -56,10 +60,10 @@ var MiradorDisableZoom = {
             */
             Mirador.Window.prototype.toggleZoomLock = function(linkElement, disableOsdZoom) {
                 if (disableOsdZoom === true) {
-                    this.eventEmitter.publish("disableOsdZoom." + this.id);
+                    this.eventEmitter.publish('disableOsdZoom.' + this.id);
                     $(linkElement).addClass('selected');
                 } else {
-                    this.eventEmitter.publish("enableOsdZoom." + this.id);
+                    this.eventEmitter.publish('enableOsdZoom.' + this.id);
                     $(linkElement).removeClass('selected');
                 }
                 this.windowZoomDisabled = !!disableOsdZoom;
