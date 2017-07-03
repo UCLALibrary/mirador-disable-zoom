@@ -61,10 +61,10 @@ var MiradorDisableZoom = {
             */
             Mirador.Window.prototype.toggleZoomLock = function(linkElement, disableOsdZoom) {
                 if (disableOsdZoom === true) {
-                    this.eventEmitter.publish("disableOsdZoom." + this.id);
+                    this.eventEmitter.publish('disableOsdZoom.' + this.id);
                     $(linkElement).addClass('selected');
                 } else {
-                    this.eventEmitter.publish("enableOsdZoom." + this.id);
+                    this.eventEmitter.publish('enableOsdZoom.' + this.id);
                     $(linkElement).removeClass('selected');
                 }
                 this.windowZoomDisabled = !!disableOsdZoom;
