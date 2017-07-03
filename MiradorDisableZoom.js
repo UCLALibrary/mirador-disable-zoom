@@ -17,7 +17,6 @@ var MiradorDisableZoom = {
     init: function() {
         var _this = this;
 
-        // add locales for this button
         i18next.on('initialized', function() {
             for (var locale in _this.locales) {
                 i18next.addResources(locale, 'translation', _this.locales[locale]);
@@ -25,54 +24,26 @@ var MiradorDisableZoom = {
         });
 
         /*
-         * extends
-         *
          * Mirador.Window
          */
         (function() {
-            // put inside a closure so we can reuse the following variable declarations in the other classes' method extensions
+
+            /* 0. Declare variables for the constructor and any methods that we'll override. */
+
             var constructor = Mirador.Window,
-                prototype = Mirador.Window.prototype,
                 listenForActions = Mirador.Window.prototype.listenForActions;
+
+            /* 1. Override methods and register (and document!) new ones. */
 
             Mirador.Window.prototype.listenForActions = function() {
                 listenForActions.apply(this, arguments);
 
-                // turn off zoom disable when we change the current canvas
-                this.eventEmitter.subscribe('SET_CURRENT_CANVAS_ID.' + this.id, function(event) {
-                    this.toggleZoomLock(this.element.find('.mirador-icon-disable-zoom'), false);
+                this.eventEmitter.subscribe('focusUpdated' + this.id, function(event, focusState) {
+                    // triggered when toggling viewing states or changing the current canvas
+                    // a new OSD will be created, so just de-select the button
+                    this.element.find('.mirador-icon-disable-zoom').removeClass('selected');
                 }.bind(this));
-
-                // turn off zoom disable when we change between ImageView and BookView
-                // FIXME: the following attempt throws an exception
-                /*
-                this.eventEmitter.subscribe('focusUpdated' + this.id, function(event) {
-                    // toggle window zoom off
-                    this.toggleZoomLock(this.element.find('.mirador-icon-disable-zoom'), false);
-                }.bind(this));
-                */
             };
-
-
-            Mirador.Window = function() {
-                var w = new constructor($.extend(true, Array.prototype.slice.call(arguments)[0], {
-                    windowZoomDisabled: false
-                }));
-
-                // add button (the compiled template) to the DOM
-                w.element.find('.window-manifest-navigation').prepend(_this.template());
-
-                // TODO: do the following by extending bindEvents instead, for consistency with how we are extending listenForActions
-                w.element.find('.mirador-icon-disable-zoom').on('click', function(event) {
-                    w.toggleZoomLock(this, !w.windowZoomDisabled);
-                });
-
-                return w;
-            };
-
-            // restore the prototype
-            // TODO: there is probably a better way to make sure the prototype is not lost -- is this necessary?
-            Mirador.Window.prototype = prototype;
 
             /*
             * Mirador.Window.prototype.toggleZoomLock
@@ -93,20 +64,40 @@ var MiradorDisableZoom = {
                 }
                 this.windowZoomDisabled = !!disableOsdZoom;
             };
+
+            /* 2. Override the constructor. */
+
+            Mirador.Window = function() {
+                var w = new constructor($.extend(true, Array.prototype.slice.call(arguments)[0], {
+                    windowZoomDisabled: false
+                }));
+
+                // add button (the compiled template) to the DOM
+                w.element.find('.window-manifest-navigation').prepend(_this.template());
+
+                // add click handler for the new button
+                w.element.find('.mirador-icon-disable-zoom').on('click', function(event) {
+                    w.toggleZoomLock(this, !w.windowZoomDisabled);
+                });
+
+                return w;
+            };
         })();
 
-
         /*
-         * extends
-         *
-         * Mirador.ImageView
          * Mirador.BookView
+         * Mirador.ImageView
          */
         (function() {
-            ['ImageView', 'BookView'].forEach(function(viewType) {
+            ['BookView', 'ImageView'].forEach(function(viewType) {
+
+                /* 0. */
+
                 var constructor = Mirador[viewType],
                     listenForActions = Mirador[viewType].prototype.listenForActions;
             
+                /* 1. */
+
                 Mirador[viewType].prototype.listenForActions = function() {
                     listenForActions.apply(this, arguments);
                     this.eventEmitter.subscribe('disableOsdZoom.' + this.windowId, function(event) {
@@ -120,6 +111,8 @@ var MiradorDisableZoom = {
                         this.osd.zoomPerScroll = this.defaultWindowZoomPerScroll;
                     }.bind(this));
                 };
+
+                /* 2. */
 
                 Mirador[viewType] = function() {
                     return new constructor($.extend(true, Array.prototype.slice.call(arguments)[0], {
