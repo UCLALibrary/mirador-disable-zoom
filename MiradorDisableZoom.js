@@ -40,13 +40,14 @@ var MiradorDisableZoom = {
             /* 1. Override methods and register (and document!) new ones. */
 
             Mirador.Window.prototype.listenForActions = function() {
+                var _this = this;
                 listenForActions.apply(this, arguments);
 
                 this.eventEmitter.subscribe('focusUpdated' + this.id, function(event, focusState) {
                     // triggered when toggling viewing states or changing the current canvas
                     // a new OSD will be created, so just de-select the button
-                    this.element.find('.mirador-icon-disable-zoom').removeClass('selected');
-                }.bind(this));
+                    _this.element.find('.mirador-icon-disable-zoom').removeClass('selected');
+                });
             };
 
             /*
@@ -60,10 +61,10 @@ var MiradorDisableZoom = {
             */
             Mirador.Window.prototype.toggleZoomLock = function(linkElement, disableOsdZoom) {
                 if (disableOsdZoom === true) {
-                    this.eventEmitter.publish('disableOsdZoom.' + this.id);
+                    this.eventEmitter.publish("disableOsdZoom." + this.id);
                     $(linkElement).addClass('selected');
                 } else {
-                    this.eventEmitter.publish('enableOsdZoom.' + this.id);
+                    this.eventEmitter.publish("enableOsdZoom." + this.id);
                     $(linkElement).removeClass('selected');
                 }
                 this.windowZoomDisabled = !!disableOsdZoom;
@@ -103,17 +104,19 @@ var MiradorDisableZoom = {
                 /* 1. */
 
                 Mirador[viewType].prototype.listenForActions = function() {
+                    var _this = this;
                     listenForActions.apply(this, arguments);
+
                     this.eventEmitter.subscribe('disableOsdZoom.' + this.windowId, function(event) {
                         // 1 is the multiplicative identity
-                        this.osd.zoomPerClick = 1;
-                        this.osd.zoomPerScroll = 1;
-                    }.bind(this));
+                        _this.osd.zoomPerClick = 1;
+                        _this.osd.zoomPerScroll = 1;
+                    });
                     this.eventEmitter.subscribe('enableOsdZoom.' + this.windowId, function(event) {
                         // restore the default settings
-                        this.osd.zoomPerClick = this.defaultWindowZoomPerClick;
-                        this.osd.zoomPerScroll = this.defaultWindowZoomPerScroll;
-                    }.bind(this));
+                        _this.osd.zoomPerClick = _this.defaultWindowZoomPerClick;
+                        _this.osd.zoomPerScroll = _this.defaultWindowZoomPerScroll;
+                    });
                 };
 
                 /* 2. */
