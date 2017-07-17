@@ -9,7 +9,15 @@ When interacting with Mirador on touch devices, users report that they sometimes
 - changes the view type (BookView -> ImageView, and vice versa)
 
 ## Setup
-Drop these files into your Mirador build output directory and point your webpage to them:
+
+Clone this repository and do:
+
+```bash
+npm install
+gulp
+```
+
+Now look in the 'dist/' folder. Drop these files into your Mirador build output directory and point your webpage to them:
 
 ```html
 <!DOCTYPE html>
@@ -17,13 +25,15 @@ Drop these files into your Mirador build output directory and point your webpage
     <head>
         ...
         <link rel="stylesheet" type="text/css" href="mirador-combined.css">
-        <link rel="stylesheet" type="text/css" href="MiradorDisableZoom.css">
+        <link rel="stylesheet" type="text/css" href="MiradorDisableZoom.min.css">
         ...
     </head>
     <body>
         <div id="viewer"></div>
+
         <script src="mirador.js"></script>
-        <script src="MiradorDisableZoom.js"></script>
+        <script src="MiradorDisableZoom.min.js"></script>
+
         <script type="text/javascript">
 
         $(function() {
