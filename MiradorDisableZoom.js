@@ -17,29 +17,31 @@ var MiradorDisableZoom = {
     ].join('')),
 
     init: function() {
-        var _this = this;
+        var self = this;
 
         i18next.on('initialized', function() {
-            for (var locale in _this.locales) {
+            for (var locale in self.locales) {
                 // add translations from each locale
                 var ns = 'translation';
-                i18next.addResourceBundle(locale, ns, _this.locales[locale][ns], true, true);
+                i18next.addResourceBundle(locale, ns, self.locales[locale][ns], true, true);
             };
         });
 
         /*
          * Mirador.Window
          */
-        (function() {
+        (function($) {
 
             /* 0. Declare variables for the constructor and any methods that we'll override. */
 
-            var constructor = Mirador.Window,
-                listenForActions = Mirador.Window.prototype.listenForActions;
+            var constructor = $.Window,
+                prototype = $.Window.prototype,
+                bindEvents = $.Window.prototype.bindEvents,
+                listenForActions = $.Window.prototype.listenForActions;
 
             /* 1. Override methods and register (and document!) new ones. */
 
-            Mirador.Window.prototype.listenForActions = function() {
+            $.Window.prototype.listenForActions = function() {
                 var _this = this;
                 listenForActions.apply(this, arguments);
 
@@ -50,60 +52,64 @@ var MiradorDisableZoom = {
                 });
             };
 
+            $.Window.prototype.bindEvents = function() {
+                var _this = this;
+                bindEvents.apply(this, arguments);
+
+                // add button (the compiled template) to the DOM
+                this.element.find('.window-manifest-navigation').prepend(self.template());
+                // add click handler for the new button
+                this.element.find('.mirador-icon-disable-zoom').on('click', function(event) {
+                    _this.toggleZoomLock(this, !_this.windowZoomDisabled);
+                });
+            };
+
             /*
-            * Mirador.Window.prototype.toggleZoomLock
-            *
-            * Disables or enables this window's zoom controls.
-            * @param {Object} linkElement
-            *   The <a> element with class '.mirador-icon-disable-zoom'.
-            * @param {Boolean} disableOsdZoom
-            *   Whether to set this window's zoom to enabled (false) or disabled (true).
-            */
-            Mirador.Window.prototype.toggleZoomLock = function(linkElement, disableOsdZoom) {
+             * Mirador.Window.prototype.toggleZoomLock
+             *
+             * Disables or enables this window's zoom controls.
+             * @param {Object} linkElement
+             *   The <a> element with class '.mirador-icon-disable-zoom'.
+             * @param {Boolean} disableOsdZoom
+             *   Whether to set this window's zoom to enabled (false) or disabled (true).
+             */
+            $.Window.prototype.toggleZoomLock = function(linkElement, disableOsdZoom) {
                 if (disableOsdZoom === true) {
                     this.eventEmitter.publish('disableOsdZoom.' + this.id);
-                    $(linkElement).addClass('selected');
+                    jQuery(linkElement).addClass('selected');
                 } else {
                     this.eventEmitter.publish('enableOsdZoom.' + this.id);
-                    $(linkElement).removeClass('selected');
+                    jQuery(linkElement).removeClass('selected');
                 }
                 this.windowZoomDisabled = !!disableOsdZoom;
             };
 
             /* 2. Override the constructor. */
 
-            Mirador.Window = function() {
-                var w = new constructor($.extend(true, Array.prototype.slice.call(arguments)[0], {
+            $.Window = function() {
+                return new constructor(jQuery.extend(true, Array.prototype.slice.call(arguments)[0], {
                     windowZoomDisabled: false
                 }));
-
-                // add button (the compiled template) to the DOM
-                w.element.find('.window-manifest-navigation').prepend(_this.template());
-
-                // add click handler for the new button
-                w.element.find('.mirador-icon-disable-zoom').on('click', function(event) {
-                    w.toggleZoomLock(this, !w.windowZoomDisabled);
-                });
-
-                return w;
             };
-        })();
+            $.Window.prototype = prototype;
+        })(Mirador);
 
         /*
          * Mirador.BookView
          * Mirador.ImageView
          */
-        (function() {
+        (function($) {
             ['BookView', 'ImageView'].forEach(function(viewType) {
 
                 /* 0. */
 
-                var constructor = Mirador[viewType],
-                    listenForActions = Mirador[viewType].prototype.listenForActions;
+                var constructor = $[viewType],
+                    prototype = $[viewType].prototype,
+                    listenForActions = $[viewType].prototype.listenForActions;
             
                 /* 1. */
 
-                Mirador[viewType].prototype.listenForActions = function() {
+                $[viewType].prototype.listenForActions = function() {
                     var _this = this;
                     listenForActions.apply(this, arguments);
 
@@ -121,15 +127,16 @@ var MiradorDisableZoom = {
 
                 /* 2. */
 
-                Mirador[viewType] = function() {
-                    return new constructor($.extend(true, Array.prototype.slice.call(arguments)[0], {
+                $[viewType] = function() {
+                    return new constructor(jQuery.extend(true, Array.prototype.slice.call(arguments)[0], {
                         // TODO: read this from the OSD configuration instead of using this magic number
                         defaultWindowZoomPerClick: 1.2,
                         defaultWindowZoomPerScroll: 1.2
                     }));
                 };
+                $[viewType].prototype = prototype;
             });
-        })();
+        })(Mirador);
     }
 };
 
