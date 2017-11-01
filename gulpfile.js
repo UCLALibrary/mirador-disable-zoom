@@ -8,14 +8,14 @@ gulp.task('clean', function() {
     del('dist');
 });
 
-gulp.task('scripts', function() {
+gulp.task('scripts', ['clean'], function() {
     return gulp.src('src/*.js')
         .pipe(uglify())
         .pipe(concat('MiradorDisableZoom.min.js'))
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('stylesheets', function() {
+gulp.task('stylesheets', ['clean'], function() {
     return gulp.src('src/*.css')
         .pipe(cleanCSS())
         .pipe(concat('MiradorDisableZoom.min.css'))
